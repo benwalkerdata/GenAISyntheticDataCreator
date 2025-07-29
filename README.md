@@ -31,6 +31,13 @@ A powerful, modular Python application that generates synthetic documents and da
 - **Progress Tracking**: Real-time generation status
 - **Error Handling**: Robust fallback mechanisms
 
+### Main Interface
+![Main Interface](screenshots/UI_Screenshot.png)
+
+### Output
+![File Outputs](screenshots/Output_Screenshot.png)
+)
+
 ## 📁 Project Structure
 
 ```
