@@ -35,7 +35,7 @@ A powerful, modular Python application that generates synthetic documents and da
 ![Main Interface](screenshots/UI_Screenshot.png)
 
 ### Output
-![File Outputs](screenshots/Output_Screenshot.png)
+![Outputs](screenshots/Output.png)
 
 ## 📁 Project Structure
 
