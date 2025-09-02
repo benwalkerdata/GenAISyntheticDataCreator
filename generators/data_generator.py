@@ -1,43 +1,42 @@
+"""
+Core Synthetic Data Generator Class
+Handles Ollama communication and orchestrates document/data generation
+"""
+
 import requests
 import tempfile
-from openai import OpenAI
 import os
 from .document_generator import DocumentGenerator
 from .excel_generator import ExcelGenerator
 
+
 class SyntheticDataGenerator:
-    def __init__(self, use_llama4=False):
-        # Set this variable to True for llama4.cc-demos.com, False for Ollama
-        self.use_llama4 = use_llama4
-
-        if self.use_llama4:
-            self.api_base_url = "https://llama4.cc-demos.com/v1"
-            self.api_key = "openai"  # Use proper key if needed
-        else:
-            self.api_base_url = "http://localhost:11434/api/generate"
-            self.api_key = None  # Ollama usually doesn't require an API key
-
+    def __init__(self):
+        #self.ollama_url = "http://localhost:11434/api/generate"
+        self.ollama_url = "https://llama4.cc-demos.com/v1/chat/completions"
         self.document_generator = DocumentGenerator(self)
         self.excel_generator = ExcelGenerator(self)
-        self.client = OpenAI(
-            base_url=self.api_base_url,
-            api_key=self.api_key,
-        )
 
     def generate_with_ollama(self, prompt, max_tokens=None):
-        """Generate content via Llama 4 Chat API (Ollama or llama4.cc-demos.com)."""
+        """Generate content using local Ollama Mistral Model with enhanced parameters"""
+        payload = {
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "num_predict": max_tokens or 4000,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "repeat_penalty": 1.1
+            }
+        }
+
         try:
-            messages = [
-                {"role": "user", "content": prompt}
-            ]
-            response = self.client.chat.completions.create(
-                model="meta/llama-4-scout-17b-16e-instruct",  # Replace if needed
-                messages=messages,
-                temperature=0.7,
-                top_p=0.9,
-                max_tokens=max_tokens or 4000,
-            )
-            return response.choices.message.content
+            response = requests.post(self.ollama_url, json=payload)
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Error: Could not connect to Ollama"
         except Exception as e:
             return f"Error: {str(e)}"
 
