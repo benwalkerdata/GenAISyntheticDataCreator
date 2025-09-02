@@ -5,7 +5,6 @@ Handles Ollama communication and orchestrates document/data generation
 
 import requests
 import tempfile
-from openai import OpenAI
 import os
 from .document_generator import DocumentGenerator
 from .excel_generator import ExcelGenerator
@@ -13,37 +12,35 @@ from .excel_generator import ExcelGenerator
 
 class SyntheticDataGenerator:
     def __init__(self):
-        self.api_base_url = "https://llama4.cc-demos.com/v1"
-        self.api_key = "openai"
+        #self.ollama_url = "http://localhost:11434/api/generate"
+        self.ollama_url = "https://llama4.cc-demos.com/v1/chat/completions"
         self.document_generator = DocumentGenerator(self)
         self.excel_generator = ExcelGenerator(self)
-        self.client = OpenAI(
-            base_url=self.api_base_url,
-            api_key=self.api_key,  # Set your API key if needed
-        )
 
     def generate_with_ollama(self, prompt, max_tokens=None):
-        """Generate content using remote Llama 4 NIM Model via OpenAI-compatible API."""
+        """Generate content using local Ollama Mistral Model with enhanced parameters"""
+        payload = {
+            #"model": "mistral",
+            "model":
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "num_predict": max_tokens or 4000,
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "repeat_penalty": 1.1
+            }
+        }
+
         try:
-            # Message interface as per OpenAI Chat API (role: user)
-            messages = [
-                {"role": "user", "content": prompt}
-            ]
-            response = self.client.chat.completions.create(
-                model="meta/llama-4-scout-17b-16e-instruct",  # Replace with your deployed model name if needed
-                messages=messages,
-                temperature=0.7,
-                top_p=0.9,
-                max_tokens=max_tokens or 4000,
-                # Other params as needed...
-            )
-            # Result is in response.choices
-            return response.choices[0].message.content
+            response = requests.post(self.ollama_url, json=payload)
+            if response.status_code == 200:
+                return response.json()["response"]
+            else:
+                return "Error: Could not connect to Ollama"
         except Exception as e:
             return f"Error: {str(e)}"
-    
 
-    
     def generate_document(self, content_type, pages, subject, file_format):
         """Generate document content and create file"""
         return self.document_generator.generate_document(content_type, pages, subject, file_format)

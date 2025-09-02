@@ -10,8 +10,8 @@ python-docx>=0.8.11
 reportlab>=3.6.0
 
 # Additional Utilities
-io-extensions>=0.0.1
-tempfile-extensions>=1.0.0
+#io-extensions>=0.0.1
+#tempfile-extensions>=1.0.0
 
 # Development Dependencies (Optional)
 pytest>=7.0.0
